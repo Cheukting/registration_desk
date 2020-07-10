@@ -19,12 +19,17 @@ reg_channel_id = int(os.environ["REG_CHANNEL_ID"])
 try:
     speaker_channel_id = int(os.environ["SPEAKER_CHANNEL_ID"])
 except:
-    speaker_channel_id = None
+    speaker_channel_id = reg_channel_id
 
 try:
     attendee_channel_id = int(os.environ["ATTENDEE_CHANNEL_ID"])
 except:
-    attendee_channel_id = None
+    attendee_channel_id = reg_channel_id
+
+try:
+    sprinter_channel_id = int(os.environ["SPRINTER_CHANNEL_ID"])
+except:
+    sprinter_channel_id = reg_channel_id
 
 try:
     only_respond_reg = int(os.environ["ONLY_RESPOND_REG"])
@@ -37,11 +42,14 @@ event_name = "EuroPython"
 instruction = f"Welcome to {event_name}! Please use `!register <Full Name>, <Ticket Number>` to register.\nE.g. `!register James Brown, 99999`\nNOTE: please ONLY register for YOURSELF."
 
 
-def welcome_msg(mention, is_speaker=False):
-    if is_speaker:
-        return f"Welcome {mention}, you now have the speaker and attendee roles."
+def welcome_msg(mention, roles):
+    if len(roles) == 2:
+        return f"Welcome {mention}, you now have the {roles[0]} and {roles[1]} roles."
+    elif len(roles) == 1:
+        return f"Welcome {mention}, you now have the {roles[0]} role."
     else:
-        return f"Welcome {mention}, you now have the attendee role."
+        text = roles[1:-1].join(", ")
+        return f"Welcome {mention}, you now have the {roles[0]}, {text} and {roles[-1]} roles."
 
 
 bot = commands.Bot(
@@ -51,16 +59,23 @@ bot = commands.Bot(
 )
 
 
-def is_speaker(name, ticket_no):
+def roles_given(name, ticket_no):
+    # check the roles that need to be given to the user
+    # return list of roles that need to be given
     with open(os.environ["DATA_PATH"], newline="") as csvfile:
         datareader = csv.reader(csvfile, delimiter=",")
         for row in datareader:
-            if int(row[3]) == int(ticket_no):
-                if row[0] == name:
-                    if row[2] == "yes":
-                        return True
-                    else:
-                        return False
+            try: # skip if it's header
+                if int(row[4]) == int(ticket_no):
+                    if row[0] == name:
+                        if row[3] == "sprint":
+                            return ["sprinter"]
+                        if row[2] == "yes":
+                            return ["speaker", "attendee"]
+                        else:
+                            return ["attendee"]
+            except:
+                continue
 
 
 @bot.event
@@ -78,13 +93,13 @@ async def on_ready():
 async def register(ctx, *, info):
     if not only_respond_reg or ctx.channel.id == reg_channel_id:
         info = info.split(",")
-        speaker = is_speaker(info[0], info[1])
-        if speaker is None:
+        roles = roles_given(info[0], info[1])
+        if roles is None:
             logging.info(
                 f"FAIL: Cannot find request form user {ctx.author} with name={info[0]}, ticket_no={info[1]}"
             )
             await ctx.send(
-                f"{ctx.author.mention} Sorry cannot find the ticket #{info[1]} with name: {info[0]}.\nPlease check and make sure you put down your full name same as the one you used in registering your ticket then try again."
+                f"{ctx.author.mention} Sorry cannot find the ticket #{info[1]} with name: {info[0]}.\nPlease check and make sure you put down your full name same as the one you used in registering your ticket then try again.\nIf you want a team member to help you, please reply to this message with '@registration'"
             )
         else:
             logging.info(
@@ -95,22 +110,18 @@ async def register(ctx, *, info):
             await ctx.author.edit(nick=info[0])
             attendee_role = get(ctx.author.guild.roles, name="attendee")
             await ctx.author.add_roles(attendee_role)
-            if speaker:
-                speaker_role = get(ctx.author.guild.roles, name="speaker")
-                await ctx.author.add_roles(speaker_role)
-                if speaker_channel_id:
-                    await bot.get_channel(speaker_channel_id).send(
-                        welcome_msg(ctx.author.mention, is_speaker=True)
-                    )
-                else:
-                    await ctx.send(welcome_msg(ctx.author.mention, is_speaker=True))
-            else:
-                if attendee_channel_id:
-                    await bot.get_channel(attendee_channel_id).send(
-                        welcome_msg(ctx.author.mention)
-                    )
-                else:
-                    await ctx.send(welcome_msg(ctx.author.mention))
+
+            for role in roles:
+                role_id = get(ctx.author.guild.roles, name=role)
+
+                await ctx.author.add_roles(role_id)
+
+            if "speaker" in roles:
+                await bot.get_channel(speaker_channel_id).send(welcome_msg(ctx.author.mention, roles))
+            elif "attendee" in roles:
+                await bot.get_channel(attendee_channel_id).send(welcome_msg(ctx.author.mention, roles))
+            elif "sprinter" in roles:
+                await bot.get_channel(sprinter_channel_id).send(welcome_msg(ctx.author.mention, roles))
 
 
 @bot.command()
