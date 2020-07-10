@@ -65,7 +65,7 @@ def roles_given(name, ticket_no):
     with open(os.environ["DATA_PATH"], newline="") as csvfile:
         datareader = csv.reader(csvfile, delimiter=",")
         for row in datareader:
-            try: # skip if it's header
+            try:  # skip if it's header
                 if int(row[4]) == int(ticket_no):
                     if row[0] == name:
                         if row[3] == "sprint":
@@ -117,11 +117,17 @@ async def register(ctx, *, info):
                 await ctx.author.add_roles(role_id)
 
             if "speaker" in roles:
-                await bot.get_channel(speaker_channel_id).send(welcome_msg(ctx.author.mention, roles))
+                await bot.get_channel(speaker_channel_id).send(
+                    welcome_msg(ctx.author.mention, roles)
+                )
             elif "attendee" in roles:
-                await bot.get_channel(attendee_channel_id).send(welcome_msg(ctx.author.mention, roles))
+                await bot.get_channel(attendee_channel_id).send(
+                    welcome_msg(ctx.author.mention, roles)
+                )
             elif "sprinter" in roles:
-                await bot.get_channel(sprinter_channel_id).send(welcome_msg(ctx.author.mention, roles))
+                await bot.get_channel(sprinter_channel_id).send(
+                    welcome_msg(ctx.author.mention, roles)
+                )
 
 
 @bot.command()
