@@ -17,19 +17,9 @@ logging.basicConfig(
 reg_channel_id = int(os.environ["REG_CHANNEL_ID"])
 
 try:
-    speaker_channel_id = int(os.environ["SPEAKER_CHANNEL_ID"])
+    log_channel_id = int(os.environ["LOG_CHANNEL_ID"])
 except:
-    speaker_channel_id = reg_channel_id
-
-try:
-    attendee_channel_id = int(os.environ["ATTENDEE_CHANNEL_ID"])
-except:
-    attendee_channel_id = reg_channel_id
-
-try:
-    sprinter_channel_id = int(os.environ["SPRINTER_CHANNEL_ID"])
-except:
-    sprinter_channel_id = reg_channel_id
+    log_channel_id = None
 
 try:
     only_respond_reg = int(os.environ["ONLY_RESPOND_REG"])
@@ -102,9 +92,11 @@ async def register(ctx, *, info):
                 f"{ctx.author.mention} Sorry cannot find the ticket #{info[1]} with name: {info[0]}.\nPlease check and make sure you put down your full name same as the one you used in registering your ticket then try again.\nIf you want a team member to help you, please reply to this message with '@registration'"
             )
         else:
-            logging.info(
-                f"SUCCESS: Register user {ctx.author} with name={info[0]}, ticket_no={info[1]}"
-            )
+            log_msg = f"SUCCESS: Register user {ctx.author} name={info[0]}, ticket_no={info[1]} with roles={roles}"
+            logging.info(log_msg)
+            if log_channel_id is not None:
+                await bot.get_channel(log_channel_id).send(log_msg)
+
             await ctx.message.add_reaction("🎟️")
             await ctx.message.add_reaction("🤖")
             await ctx.author.edit(nick=info[0])
@@ -113,21 +105,9 @@ async def register(ctx, *, info):
 
             for role in roles:
                 role_id = get(ctx.author.guild.roles, name=role)
-
                 await ctx.author.add_roles(role_id)
 
-            if "speaker" in roles:
-                await bot.get_channel(speaker_channel_id).send(
-                    welcome_msg(ctx.author.mention, roles)
-                )
-            elif "attendee" in roles:
-                await bot.get_channel(attendee_channel_id).send(
-                    welcome_msg(ctx.author.mention, roles)
-                )
-            elif "sprinter" in roles:
-                await bot.get_channel(sprinter_channel_id).send(
-                    welcome_msg(ctx.author.mention, roles)
-                )
+            await ctx.author.send(welcome_msg(ctx.author.mention, roles))
 
 
 @bot.command()

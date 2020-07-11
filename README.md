@@ -13,9 +13,7 @@ The bot need certain environment variables for it to work:
 
 * REG_BOT_SECRET - secret fo the bot, provided by Discord
 * REG_CHANNEL_ID -  id of the channel that is used for resignation, the channel that you want the bot to listen to. (It only listens to this channel if ONLY_RESPOND_REG is True)
-* SPEAKER_CHANNEL_ID - (OPTIONAL) id of the channel that is used to welcome the speaker, the channel that welcome message for speakers will be display after successful registration.
-* ATTENDEE_CHANNEL_ID - (OPTIONAL) id of the channel that is used to welcome the attendee (non-speaker), the channel that welcome message for attendees will be display after successful registration.
-* SPRINTER_CHANNEL_ID - (OPTIONAL) id of the channel that is used to welcome the sprinters (registration for sprinter tickets), the channel that welcome message for sprinters will be display after successful registration.
+* LOG_CHANNEL_ID -  (OPTIONAL) id of the channel that is used for logging (if it is not set, it will not be sending the log to any channels)
 * DATA_PATH - path to the data CSV (see below for the format explanation)
 * ONLY_RESPOND_REG - (OPTIONAL) if True bot only response to the registration channel, default is False
 
