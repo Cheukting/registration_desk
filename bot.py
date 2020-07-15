@@ -29,7 +29,7 @@ except:
 # TODO: seperate customization in conf file
 event_name = "EuroPython"
 
-instruction = f"Welcome to {event_name}! Please use `!register <Full Name>, <Ticket Number>` to register.\nE.g. `!register James Brown, 99999`\nNOTE: please ONLY register for YOURSELF."
+instruction = f"Welcome to {event_name}! Please use `!register <Full Name>, <Ticket Number>` to register.\nE.g. `!register James Brown, 99999`"
 
 
 def welcome_msg(mention, roles):
@@ -101,8 +101,11 @@ async def register(ctx, *, info):
         elif len(roles) > 0:
             log_msg = f"SUCCESS: Register user {ctx.author} name={name}, ticket_no={ticket_number} with roles={roles}"
 
-            await ctx.message.add_reaction("🎟️")
-            await ctx.message.add_reaction("🤖")
+            await ctx.message.delete()
+            update_msg = await ctx.send(f"{name} registered")
+            await update_msg.add_reaction("🎟️")
+            await update_msg.add_reaction("🤖")
+
             await ctx.author.edit(nick=name)
             attendee_role = get(ctx.author.guild.roles, name="attendee")
             await ctx.author.add_roles(attendee_role)
