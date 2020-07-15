@@ -86,7 +86,7 @@ async def register(ctx, *, info):
         mem_nick = list(map(lambda mem: mem.nick, ctx.guild.members))
         if name in mem_nick:
             await ctx.send(
-                f"{ctx.author.mention} Sorry, your name has already been register. The reason could be:\n1) your ticket has not be assgined to you property or;\n2) although it seems quite rare, someone has the same name as you.\n\nYou may ask the person who bought you the ticket to check if they have assgin the ticket to you with your full name. In anycase, if you need a team member to help, contact '@registration'"
+                f"{ctx.author.mention} Sorry, your name has already been registered. The reason could be:\n1) your ticket has not be assgined to you property or;\n2) although it seems quite rare, someone has the same name as you.\n\nYou may ask the person who bought you the ticket to check if they have assgin the ticket to you with your full name. In anycase, if you need a team member to help, contact '@registration'"
             )
             roles = []
             log_msg = f"FAIL: Request form user {ctx.author} with name={name}, ticket_no={ticket_number} has duplicated name"
