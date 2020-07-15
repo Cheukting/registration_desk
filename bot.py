@@ -83,19 +83,23 @@ async def on_ready():
 async def register(ctx, *, info):
     if not only_respond_reg or ctx.channel.id == reg_channel_id:
         name, ticket_number = info.split(",")
-        roles = roles_given(name, ticket_number)
-        if roles is None:
-            logging.info(
-                f"FAIL: Cannot find request form user {ctx.author} with name={name}, ticket_no={ticket_number]}"
-            )
+        mem_nick = list(map(lambda mem: mem.nick, ctx.guild.members))
+        if name in mem_nick:
             await ctx.send(
-                f"{ctx.author.mention} Sorry cannot find the ticket #{ticket_number} with name: {name}.\nPlease check and make sure you put down your full name same as the one you used in registering your ticket then try again.\nIf you want a team member to help you, please reply to this message with '@registration'"
+                f"{ctx.author.mention} Sorry, your name has already been register. The reason could be:\n1) your ticket has not be assgined to you property or;\n2) although it seems quite rare, someone has the same name as you.\n\nYou may ask the person who bought you the ticket to check if they have assgin the ticket to you with your full name. In anycase, if you need a team member to help, contact '@registration'"
             )
+            roles = []
+            log_msg = f"FAIL: Request form user {ctx.author} with name={name}, ticket_no={ticket_number} has duplicated name"
         else:
+            roles = roles_given(name, ticket_number)
+
+        if roles is None:
+            log_msg = f"FAIL: Cannot find request form user {ctx.author} with name={name}, ticket_no={ticket_number}"
+            await ctx.send(
+                f"{ctx.author.mention} Sorry, cannot find the ticket #{ticket_number} with name: {name}.\n\nPlease check and make sure you put down your full name same as the one you used in registering your ticket then try again.\n\nIf you want a team member to help you, please reply to this message with '@registration'"
+            )
+        elif len(roles) > 0:
             log_msg = f"SUCCESS: Register user {ctx.author} name={name}, ticket_no={ticket_number} with roles={roles}"
-            logging.info(log_msg)
-            if log_channel_id is not None:
-                await bot.get_channel(log_channel_id).send(log_msg)
 
             await ctx.message.add_reaction("🎟️")
             await ctx.message.add_reaction("🤖")
@@ -108,6 +112,11 @@ async def register(ctx, *, info):
                 await ctx.author.add_roles(role_id)
 
             await ctx.author.send(welcome_msg(ctx.author.mention, roles))
+
+        if log_msg is not None:
+            logging.info(log_msg)
+            if log_channel_id is not None:
+                await bot.get_channel(log_channel_id).send(log_msg)
 
 
 @bot.command()

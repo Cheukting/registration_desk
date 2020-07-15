@@ -7,6 +7,14 @@ Roles will be given to successful registration:
 * `attendee` if it's a non-speaker ticket to the conference
 * `sprinter` if it's a sprint ticket
 
+## Ticket checking logic
+
+The users' name and ticket will be check against the data in the CSV file. The check will fail if:
+
+1) The user's full name is the same as someone's name in the channel (name has been registered before)
+
+2) There is no match, matching of name is case insensitive.
+
 ## Set up environment variables
 
 The bot need certain environment variables for it to work:
