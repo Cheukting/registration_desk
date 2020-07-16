@@ -49,10 +49,12 @@ bot = commands.Bot(
     help_command=None,
 )
 
+
 def get_input(info):
     result = re.match(r"([\w\s]+)[,\W#]+(\d+)", info)
     if result:
         return result.group(1), result.group(2)
+
 
 def roles_given(name, ticket_no):
     # check the roles that need to be given to the user
@@ -91,14 +93,16 @@ async def register(ctx, *, info):
             name, ticket_number = get_input(info)
             name = name.strip()
         except:
-            name = 'Unknown'
+            name = "Unknown"
             ticket_number = None
 
         mem_nick = list(map(lambda mem: mem.nick, ctx.guild.members))
 
-        if name in mem_nick:#if nick is taken
+        if name in mem_nick:  # if nick is taken
             await ctx.message.delete()
-            update_msg = await ctx.send(f"Cannot register {name}, please check and try again, or ask @registration for help")
+            update_msg = await ctx.send(
+                f"Cannot register {name}, please check and try again, or ask @registration for help"
+            )
 
             await ctx.author.send(
                 f"{ctx.author.mention} Sorry, your name has already been registered. The reason could be:\n1) your ticket has not be assgined to you property or;\n2) although it seems quite rare, someone has the same name as you.\n\nYou may ask the person who bought you the ticket to check if they have assgin the ticket to you with your full name. In anycase, if you need a team member to help, contact @registration in the channel"
@@ -111,16 +115,18 @@ async def register(ctx, *, info):
             else:
                 roles = None
 
-        if roles is None: #if no match from data
+        if roles is None:  # if no match from data
             log_msg = f"FAIL: Cannot find request form user {ctx.author} with name={name}, ticket_no={ticket_number}"
 
             await ctx.message.delete()
-            update_msg = await ctx.send(f"Cannot register {name}, please check and try again, or ask @registration for help")
+            update_msg = await ctx.send(
+                f"Cannot register {name}, please check and try again, or ask @registration for help"
+            )
 
             await ctx.author.send(
                 f"{ctx.author.mention} Sorry, cannot find the ticket {ticket_number} with name: {name}.\n\nPlease check and make sure:\n1) the name matches the full name that you used in registering your ticket;\n2) seperate you name and the ticket number with a ',';\nthen try again.\n\nYour ticket number can be found at https://ep2020.europython.eu/user-panel/\nIf you want a team member to help you, please contact @registration in the channel"
             )
-        elif len(roles) > 0: #if match found
+        elif len(roles) > 0:  # if match found
             log_msg = f"SUCCESS: Register user {ctx.author} name={name}, ticket_no={ticket_number} with roles={roles}"
 
             await ctx.message.delete()
