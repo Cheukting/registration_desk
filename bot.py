@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import logging
 import re
@@ -32,6 +33,8 @@ event_name = "EuroPython"
 
 instruction = f"Welcome to {event_name}! Please use `!register <Full Name>, <Ticket Number>` to register.\nE.g. `!register James Brown, 99999`"
 
+last_help_msg = None
+help_msg_every =20 #how many messages between auto help messages
 
 def welcome_msg(mention, roles):
     if len(roles) == 2:
@@ -74,14 +77,24 @@ def roles_given(name, ticket_no):
             except:
                 continue
 
+async def resend_help():
+    global last_help_msg
+    await bot.wait_until_ready()
+    channel = bot.get_channel(reg_channel_id)
+    while True:
+        messages = await channel.history(after=last_help_msg).flatten()
+        if len(messages) >= help_msg_every:
+            last_help_msg = await channel.send(instruction)
+        await asyncio.sleep(10) # task runs every 60 seconds
 
 @bot.event
 async def on_ready():
+    global last_help_msg
     await bot.change_presence(
         status=discord.Status.online,
         activity=discord.Activity(type=discord.ActivityType.listening, name="!help"),
     )
-    await bot.get_channel(reg_channel_id).send(instruction)
+    last_help_msg = await bot.get_channel(reg_channel_id).send(instruction)
     print("Bot is ready")
     logging.info("Bot logged in")
 
@@ -152,8 +165,9 @@ async def register(ctx, *, info):
 
 @bot.command()
 async def help(ctx):
+    global last_help_msg
     if not only_respond_reg or ctx.channel.id == reg_channel_id:
-        await ctx.send(instruction)
+        last_help_msg = await ctx.send(instruction)
 
-
+bot.loop.create_task(resend_help())
 bot.run(os.environ["REG_BOT_SECRET"])
