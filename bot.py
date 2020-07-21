@@ -54,7 +54,7 @@ bot = commands.Bot(
 
 
 def get_input(info):
-    result = re.match(r"([\w\s-]+)[,.|#\W]+(\d+)", info)
+    result = re.match(r"([\w\s.-]+)[,|#\W]+(\d+)", info)
     if result:
         return result.group(1), result.group(2)
 
