@@ -34,7 +34,7 @@ event_name = "EuroPython"
 instruction = f"Welcome to {event_name}! Please use `!register <Full Name>, <Ticket Number>` to register.\nE.g. `!register James Brown, 99999`"
 
 last_help_msg = None
-help_msg_every =20 #how many messages between auto help messages
+help_msg_every =10 #how many messages between auto help messages
 
 def welcome_msg(mention, roles):
     if len(roles) == 2:
