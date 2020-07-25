@@ -149,8 +149,6 @@ async def register(ctx, *, info):
             await update_msg.add_reaction("🤖")
 
             await ctx.author.edit(nick=name)
-            attendee_role = get(ctx.author.guild.roles, name="attendee")
-            await ctx.author.add_roles(attendee_role)
 
             for role in roles:
                 role_id = get(ctx.author.guild.roles, name=role)
