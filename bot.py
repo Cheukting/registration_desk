@@ -143,18 +143,22 @@ async def register(ctx, *, info):
         elif len(roles) > 0:  # if match found
             log_msg = f"SUCCESS: Register user {ctx.author} name={name}, ticket_no={ticket_number} with roles={roles}"
 
-            await ctx.message.delete()
-            update_msg = await ctx.send(f"{name} registered")
-            await update_msg.add_reaction("🎟️")
-            await update_msg.add_reaction("🤖")
-
-            await ctx.author.edit(nick=name)
-
             for role in roles:
                 role_id = get(ctx.author.guild.roles, name=role)
                 await ctx.author.add_roles(role_id)
 
             await ctx.author.send(welcome_msg(ctx.author.mention, roles))
+
+            if len(name) > 32:
+                reg_role = get(ctx.author.guild.roles, name='registration')
+                await ctx.send(f"Sorry {ctx.author.mention}'s name {name} is too long for Discord to handle. {reg_role.mention} could you contact them and handle it?")
+            else:
+                await ctx.author.edit(nick=name)
+
+            await ctx.message.delete()
+            update_msg = await ctx.send(f"{name} registered")
+            await update_msg.add_reaction("🎟️")
+            await update_msg.add_reaction("🤖")
 
         if log_msg is not None:
             logging.info(log_msg)
