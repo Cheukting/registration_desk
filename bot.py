@@ -70,10 +70,11 @@ def roles_given(name, ticket_no):
                     if row[0].lower() == name.lower():
                         if row[3] == "sprint":
                             return ["sprinter"]
-                        if row[2] == "yes":
-                            return ["speaker", "attendee"]
                         else:
-                            return ["attendee"]
+                            if row[2] == "yes":
+                                return ["speaker", "attendee"]
+                            else:
+                                return ["attendee"]
             except:
                 continue
 
